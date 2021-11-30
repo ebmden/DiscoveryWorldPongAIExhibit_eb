@@ -401,6 +401,7 @@ class Pong:
                 if self.score_top >= self.config.MAX_SCORE or self.score_bottom >= self.config.MAX_SCORE:
                     done = True
         screen = self.render()
+        self.show(screen, duration=10)
         return screen, (reward_l, reward_r), done
 
     def step(self, bottom_action, top_action, frames=3):

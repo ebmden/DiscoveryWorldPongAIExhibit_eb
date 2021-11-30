@@ -5,7 +5,6 @@ from exhibit.train import simulator
 from exhibit.shared.utils import save_video, plot_loss, plot_score
 from exhibit.shared.config import Config
 from exhibit.ai.model import PGAgent
-from visualizer import get_weight_image
 import numpy as np
 from multiprocessing import Pool
 from tqdm import tqdm
@@ -59,7 +58,7 @@ if __name__ == "__main__":
         #agent_bottom.load("./validation/hitstop_5frame.h5")
 
     agent_top = PGAgent(state_size, action_size, name="agent_top", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
-    #agent_top.load("./validation/hitstop_5frame.h5")
+    agent_top.load("./validation/sym_large_nomp_10000.h5")
 
     # Type checks for convenience later
     top_is_model = type(agent_top) == PGAgent
@@ -98,7 +97,7 @@ if __name__ == "__main__":
             states_rev = [np.flip(state, axis=1) for state in states]
             agent_bottom.train(states_rev, *left)
 
-        neuron_states.append(get_weight_image(agent_top.model, size=state_shape))
+        #neuron_states.append(get_weight_image(agent_top.model, size=state_shape))
         if episode == 1 or episode % 50 == 0:
             save_video(render_states, f'./analytics/{episode}.mp4')
             plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)
@@ -106,5 +105,5 @@ if __name__ == "__main__":
             if bottom_is_model: agent_bottom.save(f'./models/bottom/{episode}.h5')
             if top_is_model: agent_top.save(f'./models/top/{episode}.h5')
         if episode == 10000:
-            if top_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
+            #if top_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
             exit(0)
