@@ -6,7 +6,7 @@ import struct
 import time
 import sys
 
-sys.path.append("C:\dev\DiscoveryWorldPongAIExhibit")
+sys.path.append("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit")
 print(sys.path)
 
 import json
@@ -14,19 +14,20 @@ import numpy as np
 from exhibit.shared.config import Config
 from exhibit.ai.model import PGAgent
 
+config = Config.instance()
 MODEL = 'validation/canstop_randomstart_10k.h5'
 DIFFICULTY = 2  # Easy: 0, Medium: 1, Hard: 2
 DIFFICULTY_OUTPUTS = ['visualizer/models/easy.js', 'visualizer/models/medium.js', 'visualizer/models/hard.js']
 DIFFICULTY_VARS = ['easy_model', 'medium_model', 'hard_model']
-agent = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+agent = PGAgent(config.CUSTOM_STATE_SIZE, config.CUSTOM_ACTION_SIZE)
 agent.load(MODEL)
 layers = []
 i = 0
 for w in agent.model.weights:
     l = None
     if i == 0:  # Rotate first weight matrix as temporary solution for rotated
-        l = np.rot90(w.numpy().reshape(*Config.CUSTOM_STATE_SHAPE, -1), axes=(0, 1), k=1)
-        l = l.reshape(Config.CUSTOM_STATE_SIZE, 200).tolist()
+        l = np.rot90(w.numpy().reshape(*config.CUSTOM_STATE_SHAPE, -1), axes=(0, 1), k=1)
+        l = l.reshape(config.CUSTOM_STATE_SIZE, 200).tolist()
     else:
         l = w.numpy().tolist()
 

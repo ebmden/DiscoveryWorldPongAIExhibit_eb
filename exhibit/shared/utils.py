@@ -137,7 +137,7 @@ def plot_loss(path=None, show=False, include_left=True):
     y2 = []
 
     if include_left:
-        with open('./analytics/agent_bottom.csv', 'r') as csvfile:
+        with open('/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/agent_bottom.csv', 'r') as csvfile:
             plots = csv.reader(csvfile, delimiter=',')
             i = 0
             for row in plots:
@@ -146,7 +146,7 @@ def plot_loss(path=None, show=False, include_left=True):
                 i += 1
         plt.plot(x1, y1, label='Bottom Agent')
 
-    with open('./analytics/agent_top.csv', 'r') as csvfile:
+    with open('/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/agent_top.csv', 'r') as csvfile:
         plots = csv.reader(csvfile, delimiter=',')
         i = 0
         for row in plots:
@@ -170,7 +170,7 @@ def plot_score(path=None, show=False):
     yl = []
     yr = []
 
-    with open('analytics/scores.csv', 'r') as csvfile:
+    with open('/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/scores.csv', 'r') as csvfile:
         plots = csv.reader(csvfile, delimiter=',')
         i = 0
         for row in plots:
@@ -188,5 +188,6 @@ def plot_score(path=None, show=False):
     if show:
         plt.show()
     if path:
+        print("############################ PLOTTING PLOT #######################################")
         plt.savefig(path)
     plt.cla()

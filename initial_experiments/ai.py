@@ -37,14 +37,15 @@ class DQN:
                 self.load_model(temp_file)
 
     def load_model(self, path):
-        try:
-            print("Loading " + path)
-            self.model.load_weights(path)
-            print("Successfully loaded")
-        except Exception as e:
-            print("Error loading model")
-            print(e)
-            raise(e)
+        self.model.load_weights(path)
+        # try:
+        #     #print("Loading " + path)
+        #     self.model.load_weights(path)
+        #     print("Successfully loaded")
+        # except Exception as e:
+        #     print("Error loading model")
+            # print(e)
+            # raise(e)
 
     def show_weights(self, neuron, layer=0):
         weights = self.model.get_weights()[layer][:, neuron]

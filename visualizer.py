@@ -7,6 +7,8 @@ from initial_experiments.ai import DQN
 import matplotlib.pyplot as plt
 import csv
 
+import chardet
+
 """
 This file aggregates visualization helper methods I found useful for debugging and generating figures for the paper.
 """
@@ -14,7 +16,9 @@ This file aggregates visualization helper methods I found useful for debugging a
 
 def test_model(id):
     dqn = DQN(resume=False)
-    dqn.load_model(f"./models/{id}.h5")
+    path_w = "/srdes/DiscoveryWorldPongAIExhibit/models/top/latest.h5"
+    dqn.load_model(path_w)
+    
     env = Pong()
     player.DeepQPlayer.EPSILON = 0
     right = player.DeepQPlayer(right=True)
@@ -32,16 +36,22 @@ def test_model(id):
         env.show(2)
         env.show_state(2, 0)
     l, r = env.get_score()
-    print(f"Finished game with model {id}, {l} - {r}")
+    #print(f"Finished game with model {id}, {l} - {r}")
 
 
-def plot_scores(path='./tmp/', show=False, average_of=100):
+def plot_scores(path='/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/', show=False, average_of=10):
     file_contents = {}
     from os import listdir
     from os.path import isfile, join
     files = [f for f in listdir(path) if isfile(join(path, f))]
     for file in files:
-        with open(path + file, 'r') as csvfile:
+        with open(path + file, 'rb') as csvfile:
+            content = csvfile.read().decode('utf-8', errors='replace')  # Replace errors with safe characters
+            
+            print('~~~~~~~~~~~~~~~~~~')  # Prints detected encoding
+            print(content)
+            print('~~~~~~~~~~~~~~~~~~')  # Prints detected encoding
+
             plots = list(csv.reader(csvfile, delimiter=','))
             i = 0
             x = []
@@ -64,7 +74,7 @@ def plot_scores(path='./tmp/', show=False, average_of=100):
     plt.title('Agent Score By Hidden Layer Structure')
     plt.legend(loc='lower right')
     if path:
-        plt.savefig(f'{path}/out.png')
+        plt.savefig('{}/out.png'.format(path))
     plt.cla()
 
 
@@ -100,11 +110,11 @@ def debug_step():
 # The commented out lines below can be useful for running this
 # file directly to get ad-hoc visualizations from stored data.
 #
-# plot_scores()
+plot_scores()
 # visualize_conv_filters()
 # visualize_conv_features()
-# test_model(50)
-# view_train_progression(4850, neuron=199, interval=50)
-# view_weights(1300, 0)
-# debug_step()
-# plot_loss()
+test_model('top/latest')
+view_train_progression(4850, neuron=199, interval=50)
+view_weights(1300, 0)
+debug_step()
+plot_loss()

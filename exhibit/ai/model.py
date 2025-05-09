@@ -153,7 +153,7 @@ class PGAgent:
         X = np.squeeze(np.vstack([states]))
         Y = probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
         result = self.model.train_on_batch(X, Y)
-        write(str(result), f'analytics/{self.name}.csv')
+        write(str(result), f'/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/{self.name}.csv')
 
     def load(self, name):
         """

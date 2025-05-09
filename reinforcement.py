@@ -1,5 +1,5 @@
 import warnings
-warnings.filterwarnings("ignore", message=r"Passing", category=FutureWarning)
+warnings.filterwarnings("ignore", message="Passing", category=FutureWarning)
 import os
 from exhibit.train import simulator
 from exhibit.shared.utils import save_video, plot_loss, plot_score
@@ -8,6 +8,7 @@ from exhibit.ai.model import PGAgent
 import numpy as np
 from multiprocessing import Pool
 from tqdm import tqdm
+# from player import BotPlayer
 
 """
 This file is the driver for training a new DRL pong model.
@@ -22,7 +23,8 @@ convenient monitoring and graphing of the training process.
 """
 
 GAME_BATCH = 10
-MODE = Config.instance().HIT_PRACTICE  # Config.instance().CUSTOM
+MODE = Config.instance().HIT_PRACTICE  
+MODE = Config.instance().CUSTOM
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
 ALWAYS_FOLLOW = False
@@ -30,10 +32,10 @@ PARALLELIZE = False
 
 if __name__ == "__main__":
     # Ensure directory safety
-    os.makedirs("models/bottom", exist_ok=True)
-    os.makedirs("models/top", exist_ok=True)
-    os.makedirs("analytics", exist_ok=True)
-    os.makedirs("analytics/plots", exist_ok=True)
+    os.makedirs("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/models/bottom", exist_ok=True)
+    os.makedirs("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/models/top", exist_ok=True)
+    os.makedirs("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics", exist_ok=True)
+    os.makedirs("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/plots", exist_ok=True)
 
     # Initialize for checks & scope
     start_index = None
@@ -44,8 +46,9 @@ if __name__ == "__main__":
     action_size = config.CUSTOM_ACTION_SIZE
     state_size = config.CUSTOM_STATE_SIZE
     state_shape = config.CUSTOM_STATE_SHAPE
-    #agent_l = BotPlayer(left=True,
-    #                    always_follow=ALWAYS_FOLLOW) if MODE == Config.CUSTOM else None  # Default to bot, override with model if needed
+    # agent_top = BotPlayer(left=True,
+    #                     always_follow=ALWAYS_FOLLOW, bottom = False, top = True) 
+                        #if MODE == Config.CUSTOM else None  # Default to bot, override with model if needed
     # Switch out for interactive session (against human)
     # from exhibit.game.player import HumanPlayer
     # agent_top = HumanPlayer(up='w', down='s')
@@ -55,35 +58,38 @@ if __name__ == "__main__":
         agent_bottom = None
     else:
         agent_bottom = PGAgent(state_size, action_size, name="agent_bottom", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
-        #agent_bottom.load("./validation/hitstop_5frame.h5")
+        agent_bottom.load("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/validation/hitstop_5frame.h5")
+        #agent_bottom.load("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/validation/canstop_randomstart_3k.h5")
 
     agent_top = PGAgent(state_size, action_size, name="agent_top", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
-    agent_top.load("./validation/sym_large_nomp_10000.h5")
+    #agent_bottom.load("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/validation/validation_left_dense_1000.h5")
+    agent_top.load("/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/validation/sym_large_nomp_10000.h5")
 
     # Type checks for convenience later
     top_is_model = type(agent_top) == PGAgent
-    bottom_is_model = type(agent_bottom) == PGAgent
+    bottom_is_model = False
+    #bottom_is_model = type(agent_bottom) == PGAgent
 
     episode = 0
 
     # Optional checkpoint loading
     if start_index is not None:
         episode = start_index
-        if bottom_is_model: agent_bottom.load(f'./models/bottom/{start_index}.h5')
-        agent_top.load(f'./models/top/{start_index}.h5')
+        if bottom_is_model: agent_bottom.load(f'/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/models/bottom/{start_index}.h5')
+        agent_top.load(f'/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/models/top/{start_index}.h5')
 
     # Store neuron images for fun
     neuron_states = []
     # Train loop
-    for episode in tqdm(range(10000)):
+    for episode in tqdm(range(1000)):
         episode += 1
         bottom_path = None
         top_path = None
         if bottom_is_model:
-            bottom_path = './models/bottom/latest.h5'
+            bottom_path = '/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/models/bottom/latest.h5'
             agent_bottom.save(bottom_path)
         if top_is_model:
-            top_path = './models/top/latest.h5'
+            top_path = '/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/models/top/latest.h5'
             agent_top.save(top_path)
 
         states, left, right, meta = simulator.simulate_game(config, env_type=MODE, left=agent_bottom, right=agent_top, batch=GAME_BATCH)
@@ -93,17 +99,19 @@ if __name__ == "__main__":
 
         if top_is_model:
             agent_top.train(states, *right)
+            print("TRAINING TOP: ", episode)
         if bottom_is_model:
             states_rev = [np.flip(state, axis=1) for state in states]
             agent_bottom.train(states_rev, *left)
+            print("TRAINING BOTTOM: ", episode)
 
         #neuron_states.append(get_weight_image(agent_top.model, size=state_shape))
         if episode == 1 or episode % 50 == 0:
-            save_video(render_states, f'./analytics/{episode}.mp4')
-            plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)
-            plot_score(f'./analytics/plots/score_{episode}.png')
-            if bottom_is_model: agent_bottom.save(f'./models/bottom/{episode}.h5')
-            if top_is_model: agent_top.save(f'./models/top/{episode}.h5')
-        if episode == 10000:
+            save_video(render_states, f'/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/{episode}.mp4')
+            plot_loss(f'/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/plots/loss_{episode}.png', include_left=False)
+            plot_score(f'/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/analytics/plots/score_{episode}.png')
+            if bottom_is_model: agent_bottom.save(f'/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/models/bottom/{episode}.h5')
+            if top_is_model: agent_top.save(f'/home/bassoe/srdes/DiscoveryWorldPongAIExhibit/models/top/{episode}.h5')
+        if episode == 10:
             #if top_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
             exit(0)
